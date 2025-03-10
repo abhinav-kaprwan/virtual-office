@@ -142,3 +142,46 @@ describe("User metadata Endpoint", ()=>{
     })
 })
 
+describe("User avatar information,",()=>{
+    let avatarId;
+    let token;
+    let userId;
+
+    beforeAll(async()=>{
+        const username = "testuser" + Math.floor(Math.random() * 1000);
+        const password = "testpassword";
+        const signUpResponse = await axios.post(`${API_URL}/api/v1/signup`,
+            {
+                username,
+                password,
+                type:"admin"
+            })
+        userId = signUpResponse.data.userId;
+        const response = await axios.post(`${API_URL}/api/v1/signin`,
+            {
+                    username,
+                    password,
+            })
+        token = response.data.token;
+
+        const avatarResponse = await axios.post(`${API_URL}/api/v1/admin/avatar`,{
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+            "name": "John"
+        })
+        
+        avatarId = avatarResponse.data.avatarId;
+    })
+
+    test("Get avatar information for the user",async()=>{
+        const response = await axios.get(`${API_URL}/api/v1/user/metadata/bulk?ids=[${userId}]`);
+        expect(response.data.avatars.length).toBe(1);
+        expect(response.data.avatars[0].userId).toBe(userId);
+        })
+
+    test("Available avatr should list the recently created avatar",async()=>{
+        const response = await axios.post(`${API_URL}/api/v1/avatars`);
+        const currentAvatar = response.data.avatars.find(y=>y.avatarId ==avatarId)
+        expect(currentAvatar).toBeDefined();
+    })
+})
+
