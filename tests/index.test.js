@@ -83,3 +83,62 @@ describe("Authentication",()=>{
     })
 })
 
+describe("User metadata Endpoint", ()=>{
+    let token = "";
+    let avatarId = "";
+    //Authetication is needed for all tests
+    beforeAll(async ()=>{
+        const username = "testuser" + Math.floor(Math.random() * 1000);
+        const password = "testpassword";
+        await axios.post(`${API_URL}/api/v1/signup`,
+            {
+                username,
+                password,
+                type:"admin"
+            })
+           
+        const response = await axios.post(`${API_URL}/api/v1/signin`,
+            {
+                    username,
+                    password,
+            })
+        token = response.data.token;
+
+        const avatarResponse = await axios.post(`${API_URL}/api/v1/admin/avatar`,{
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+            "name": "John"
+        })
+        
+        avatarId = avatarResponse.data.avatarId;
+    })
+
+    test("User can't update their metadata with wrong avatar id", async()=>{
+        const response = await axios.post(`${API_URL}/api/v1/user/`,{
+            avatarId:"123232334"
+        },{
+            headers:{
+                Authorization: `Bearer ${token}`
+            }
+        })
+        expect(response.status).toBe(400)
+    })
+
+    test("User can update their metadata with right id",async()=>{
+        const response = await axios.post(`${API_URL}/api/v1/user/`,{
+            avatarId: avatarId
+        },{
+            headers:{
+                Authorization: `Bearer ${token}`
+            }
+        })
+        expect(response.status).toBe(200)
+    })
+
+    test("User can't update their metadata because auth header is not present",async()=>{
+        const response = await axios.post(`${API_URL}/api/v1/user/`,{
+            avatarId: avatarId
+        })
+        expect(response.status).toBe(403)
+    })
+})
+
