@@ -11,9 +11,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@repo/db": "*",
     "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "typescript": "^5.8.2",
-    "@repo/db":"*"
+    "zod": "^4.1.11"
   }
 }
